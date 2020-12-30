@@ -6,10 +6,10 @@ import sys
 import numpy as np
 import torch
 
-from a2c_ppo_acktr.envs import VecPyTorch, make_vec_envs
-from a2c_ppo_acktr.utils import get_render_func, get_vec_normalize
+from algo.envs import VecPyTorch, make_vec_envs
+from algo.utils import get_render_func, get_vec_normalize
 
-sys.path.append('a2c_ppo_acktr')
+sys.path.append('algo')
 
 parser = argparse.ArgumentParser(description='RL')
 parser.add_argument(
@@ -21,8 +21,8 @@ parser.add_argument(
     help='log interval, one log per n updates (default: 10)')
 parser.add_argument(
     '--env-name',
-    default='PongNoFrameskip-v4',
-    help='environment to train on (default: PongNoFrameskip-v4)')
+    default='HalfCheetah-v2',
+    help='environment to train on (default: HalfCheetah-v2)')
 parser.add_argument(
     '--load-dir',
     default='./trained_models/',

@@ -3,8 +3,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from a2c_ppo_acktr.distributions import Bernoulli, Categorical, DiagGaussian
-from a2c_ppo_acktr.utils import init
+from algo.distributions import Bernoulli, Categorical, DiagGaussian
+from algo.utils import init
 
 
 class Flatten(nn.Module):
