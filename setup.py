@@ -4,4 +4,4 @@ setup(
     name='mujoco-ppo',
     packages=find_packages(),
     version='0.0.1',
-    install_requires=['gym', 'matplotlib', 'pybullet'])
+    install_requires=['gym', 'matplotlib', 'pybullet', 'torch', 'mujoco_py'])

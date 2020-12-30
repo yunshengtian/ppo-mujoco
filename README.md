@@ -1,6 +1,6 @@
 # mujoco-ppo
 
-This repository is a minimal version of the [pytorch-a2c-ppo-acktr-gail](https://github.com/ikostrikov/pytorch-a2c-ppo-acktr-gail) repository, which only includes the PyTorch implementation of [Proximal Policy Optimization](https://arxiv.org/pdf/1707.06347.pdf), and is designed to be friendly and flexible for [mujoco environments](https://gym.openai.com/envs/#mujoco). The default hyperparameters are adjusted according to the suggestions in the original [pytorch-a2c-ppo-acktr-gail](https://github.com/ikostrikov/pytorch-a2c-ppo-acktr-gail) repository.
+This repository is a minimal version of the [pytorch-a2c-ppo-acktr-gail](https://github.com/ikostrikov/pytorch-a2c-ppo-acktr-gail) repository, which only includes the PyTorch implementation of [Proximal Policy Optimization](https://arxiv.org/pdf/1707.06347.pdf), and is designed to be friendly and flexible for [MuJoCo environments](https://gym.openai.com/envs/#mujoco). The default hyperparameters are adjusted according to the suggestions in the original [pytorch-a2c-ppo-acktr-gail](https://github.com/ikostrikov/pytorch-a2c-ppo-acktr-gail) repository.
 
 ## Requirements
 
@@ -11,7 +11,7 @@ pip install -r requirements.txt
 ## Training
 
 ```bash
-python main.py --env-name HalfCheetah-v2
+python train.py --env-name HalfCheetah-v2 --num-env-steps 1000000
 ```
 
 ## Enjoy
