@@ -4,35 +4,20 @@ This repository is a minimal version of the [pytorch-a2c-ppo-acktr-gail](https:/
 
 ## Requirements
 
-* Python 3
-* [PyTorch](http://pytorch.org/)
-* [OpenAI baselines](https://github.com/openai/baselines)
-
-In order to install requirements, follow:
-
 ```bash
-# PyTorch
-conda install pytorch torchvision -c soumith
-
-# Baselines
-git clone https://github.com/openai/baselines.git
-cd baselines
-pip install -e .
-
-# Other requirements
 pip install -r requirements.txt
 ```
 
 ## Training
 
 ```bash
-python main.py --env-name "HalfCheetah-v2"
+python main.py --env-name HalfCheetah-v2
 ```
 
 ## Enjoy
 
 ```bash
-python enjoy.py --load-dir trained_models --env-name "HalfCheetah-v2"
+python enjoy.py --load-dir trained_models --env-name HalfCheetah-v2
 ```
 
 ## Visualization

@@ -5,12 +5,11 @@ import numpy as np
 import torch
 from gym.spaces.box import Box
 
-from baselines import bench
-from baselines.common.atari_wrappers import make_atari, wrap_deepmind
-from baselines.common.vec_env import VecEnvWrapper
-from baselines.common.vec_env.dummy_vec_env import DummyVecEnv
-from baselines.common.vec_env.shmem_vec_env import ShmemVecEnv
-from baselines.common.vec_env.vec_normalize import \
+from external import bench
+from external.vec_env import VecEnvWrapper
+from external.vec_env.dummy_vec_env import DummyVecEnv
+from external.vec_env.shmem_vec_env import ShmemVecEnv
+from external.vec_env.vec_normalize import \
     VecNormalize as VecNormalize_
 
 try:
@@ -37,11 +36,6 @@ def make_env(env_id, seed, rank, log_dir, allow_early_resets):
         else:
             env = gym.make(env_id)
 
-        is_atari = hasattr(gym.envs, 'atari') and isinstance(
-            env.unwrapped, gym.envs.atari.atari_env.AtariEnv)
-        if is_atari:
-            env = make_atari(env_id)
-
         env.seed(seed + rank)
 
         if str(env.__class__.__name__).find('TimeLimit') >= 0:
@@ -53,14 +47,8 @@ def make_env(env_id, seed, rank, log_dir, allow_early_resets):
                 os.path.join(log_dir, str(rank)),
                 allow_early_resets=allow_early_resets)
 
-        if is_atari:
-            if len(env.observation_space.shape) == 3:
-                env = wrap_deepmind(env)
-        elif len(env.observation_space.shape) == 3:
-            raise NotImplementedError(
-                "CNN models work only for atari,\n"
-                "please use a custom wrapper for a custom pixel input env.\n"
-                "See wrap_deepmind for an example.")
+        if len(env.observation_space.shape) == 3:
+            raise NotImplementedError
 
         # If the input has shape (W,H,3), wrap for PyTorch convolutions
         obs_shape = env.observation_space.shape
