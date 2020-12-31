@@ -88,6 +88,9 @@ if args.env_name.find('Bullet') > -1:
         if (p.getBodyInfo(i)[0].decode() == "torso"):
             torsoId = i
 
+episode_reward = 0
+episode_length = 0
+
 while True:
     if actor_critic is None:
         if args.random:
@@ -101,6 +104,13 @@ while True:
 
     # Obser reward and next obs
     obs, reward, done, _ = env.step(action)
+    episode_reward += reward.numpy()[0][0]
+    episode_length += 1
+
+    if done:
+        print(f'Episode reward {episode_reward}, length {episode_length}')
+        episode_reward = 0
+        episode_length = 0
 
     masks.fill_(0.0 if done else 1.0)
 
