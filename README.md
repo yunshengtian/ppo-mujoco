@@ -6,7 +6,7 @@ This repository is a minimal version of the [pytorch-a2c-ppo-acktr-gail](https:/
 
 Differences compared to the original [pytorch-a2c-ppo-acktr-gail](https://github.com/ikostrikov/pytorch-a2c-ppo-acktr-gail) repository:
 
-- Minimal code for PPO training
+- Minimal code for PPO training and simplified installation process
 - Using local environments in ```envs/``` for environment customization
 - Support fine-tuning policies (i.e. training starts on the loaded policy)
 - Support enjoy without learned policies (zero actions or random actions)

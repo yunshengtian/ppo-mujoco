@@ -100,8 +100,8 @@ def get_args():
         help='environment to train on (default: HalfCheetah-v2)')
     parser.add_argument(
         '--log-dir',
-        default='/tmp/gym/',
-        help='directory to save agent logs (default: /tmp/gym)')
+        default='./logs/',
+        help='directory to save agent logs (default: ./logs/)')
     parser.add_argument(
         '--save-dir',
         default='./trained_models/',
