@@ -22,6 +22,7 @@ pip install -r requirements.txt
 ```bash
 # training from scratch
 python train.py --env-name HalfCheetah-v2 --num-env-steps 1000000
+
 # fine-tuning
 python train.py --env-name HalfCheetah-v2 --num-env-steps 1000000 --load-dir trained_models
 ```
@@ -31,8 +32,10 @@ python train.py --env-name HalfCheetah-v2 --num-env-steps 1000000 --load-dir tra
 ```bash
 # with learned policy
 python enjoy.py --env-name HalfCheetah-v2 --load-dir trained_models
+
 # without learned policy (zero actions)
 python enjoy.py --env-name HalfCheetah-v2
+
 # without learned policy (random actions)
 python enjoy.py --env-name HalfCheetah-v2 --random
 ```
