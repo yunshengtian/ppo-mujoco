@@ -34,6 +34,12 @@ parser.add_argument(
     action='store_true',
     default=False,
     help='whether to use a non-deterministic policy')
+parser.add_argument(
+    '--random',
+    action='store_true',
+    default=False,
+    help='whether to execute random actions when the learned policy is not provided'
+    )
 args = parser.parse_args()
 
 args.det = not args.non_det
@@ -84,7 +90,10 @@ if args.env_name.find('Bullet') > -1:
 
 while True:
     if actor_critic is None:
-        action = torch.zeros(env.action_space.shape)
+        if args.random:
+            action = torch.tensor(env.action_space.sample())
+        else:
+            action = torch.zeros(env.action_space.shape)
     else:
         with torch.no_grad():
             value, action, _, recurrent_hidden_states = actor_critic.act(
