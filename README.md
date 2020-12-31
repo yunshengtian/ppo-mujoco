@@ -1,15 +1,16 @@
 # ppo-mujoco
 
-This repository is a minimal version of the [pytorch-a2c-ppo-acktr-gail](https://github.com/ikostrikov/pytorch-a2c-ppo-acktr-gail) repository, which only includes the PyTorch implementation of [Proximal Policy Optimization](https://arxiv.org/pdf/1707.06347.pdf), and is designed to be friendly and flexible for [MuJoCo environments](https://gym.openai.com/envs/#mujoco). The default hyperparameters are adjusted according to the suggestions in the original [pytorch-a2c-ppo-acktr-gail](https://github.com/ikostrikov/pytorch-a2c-ppo-acktr-gail) repository.
+This repository is a minimal version of the [pytorch-a2c-ppo-acktr-gail](https://github.com/ikostrikov/pytorch-a2c-ppo-acktr-gail) repository, which only includes the PyTorch implementation of [Proximal Policy Optimization](https://arxiv.org/pdf/1707.06347.pdf), and is designed to be friendly and flexible for [MuJoCo environments](https://gym.openai.com/envs/#mujoco).
 
 ## Key Features
 
-Differences compared to the original repository:
+Differences compared to the original [pytorch-a2c-ppo-acktr-gail](https://github.com/ikostrikov/pytorch-a2c-ppo-acktr-gail) repository:
 
 - Minimal code for PPO training
 - Using local environments in ```envs/``` for environment customization
 - Support fine-tuning policies (i.e. training starts on the loaded policy)
 - Support enjoy without learned policies (zero actions or random actions)
+- The default hyperparameters are adjusted according to the suggestions from the original repository
 
 ## Requirements
 
