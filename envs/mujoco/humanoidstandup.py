@@ -1,4 +1,4 @@
-from gym.envs.mujoco import mujoco_env
+from . import mujoco_env
 from gym import utils
 import numpy as np
 
