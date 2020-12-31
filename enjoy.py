@@ -64,8 +64,8 @@ if vec_norm is not None:
 if args.load_dir is None:
     actor_critic = None
 else:
-    actor_critic, ob_rms = \
-                torch.load(os.path.join(args.load_dir, args.env_name + ".pt"))
+    load_path = args.load_dir if args.load_dir.endswith('.pt') else os.path.join(args.load_dir, args.env_name + '.pt')
+    actor_critic, ob_rms = torch.load(load_path)
     
     if vec_norm is not None:
         vec_norm.ob_rms = ob_rms

@@ -46,8 +46,8 @@ def main():
             base_kwargs={'recurrent': args.recurrent_policy})
         actor_critic.to(device)
     else:
-        actor_critic, ob_rms = \
-            torch.load(os.path.join(args.load_dir, args.env_name + ".pt"))
+        load_path = args.load_dir if args.load_dir.endswith('.pt') else os.path.join(args.load_dir, args.env_name + '.pt')
+        actor_critic, ob_rms = torch.load(load_path)
         vec_norm = get_vec_normalize(envs)
         if vec_norm is not None:
             vec_norm.eval()
