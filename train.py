@@ -19,6 +19,8 @@ from algo.storage import RolloutStorage
 from algo.utils import get_vec_normalize
 from evaluation import evaluate
 
+import envs
+
 
 def main():
     args = get_args()

@@ -9,6 +9,8 @@ import torch
 from algo.envs import VecPyTorch, make_vec_envs
 from algo.utils import get_render_func, get_vec_normalize
 
+import envs
+
 sys.path.append('algo')
 
 parser = argparse.ArgumentParser(description='RL')
@@ -22,11 +24,11 @@ parser.add_argument(
 parser.add_argument(
     '--env-name',
     default='HalfCheetah-v2',
-    help='environment to train on (default: HalfCheetah-v2)')
+    help='environment that is trained on (default: HalfCheetah-v2)')
 parser.add_argument(
     '--load-dir',
-    default='./trained_models/',
-    help='directory to save agent logs (default: ./trained_models/)')
+    default=None,
+    help='directory of saved agent logs (default: None)')
 parser.add_argument(
     '--non-det',
     action='store_true',
@@ -48,17 +50,23 @@ env = make_vec_envs(
 # Get a render function
 render_func = get_render_func(env)
 
-# We need to use the same statistics for normalization as used in training
-actor_critic, ob_rms = \
-            torch.load(os.path.join(args.load_dir, args.env_name + ".pt"))
-
 vec_norm = get_vec_normalize(env)
 if vec_norm is not None:
     vec_norm.eval()
-    vec_norm.ob_rms = ob_rms
 
-recurrent_hidden_states = torch.zeros(1,
-                                      actor_critic.recurrent_hidden_state_size)
+# We need to use the same statistics for normalization as used in training
+if args.load_dir is None:
+    actor_critic = None
+else:
+    actor_critic, ob_rms = \
+                torch.load(os.path.join(args.load_dir, args.env_name + ".pt"))
+    
+    if vec_norm is not None:
+        vec_norm.ob_rms = ob_rms
+
+    recurrent_hidden_states = torch.zeros(1,
+                                        actor_critic.recurrent_hidden_state_size)
+
 masks = torch.zeros(1, 1)
 
 obs = env.reset()
@@ -75,9 +83,12 @@ if args.env_name.find('Bullet') > -1:
             torsoId = i
 
 while True:
-    with torch.no_grad():
-        value, action, _, recurrent_hidden_states = actor_critic.act(
-            obs, recurrent_hidden_states, masks, deterministic=args.det)
+    if actor_critic is None:
+        action = torch.zeros(env.action_space.shape)
+    else:
+        with torch.no_grad():
+            value, action, _, recurrent_hidden_states = actor_critic.act(
+                obs, recurrent_hidden_states, masks, deterministic=args.det)
 
     # Obser reward and next obs
     obs, reward, done, _ = env.step(action)
