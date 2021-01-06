@@ -40,6 +40,12 @@ parser.add_argument(
     default=False,
     help='whether to execute random actions when the learned policy is not provided'
     )
+parser.add_argument(
+    '--still',
+    action='store_true',
+    default=False,
+    help='whether to just stay still without any action'
+)
 args = parser.parse_args()
 
 args.det = not args.non_det
@@ -91,35 +97,39 @@ if args.env_name.find('Bullet') > -1:
 episode_reward = 0
 episode_length = 0
 
-while True:
-    if actor_critic is None:
-        if args.random:
-            action = torch.tensor(env.action_space.sample())
-        else:
-            action = torch.zeros(env.action_space.shape)
-    else:
-        with torch.no_grad():
-            value, action, _, recurrent_hidden_states = actor_critic.act(
-                obs, recurrent_hidden_states, masks, deterministic=args.det)
-
-    # Obser reward and next obs
-    obs, reward, done, _ = env.step(action)
-    episode_reward += reward.numpy()[0][0]
-    episode_length += 1
-
-    if done:
-        print(f'Episode reward {episode_reward}, length {episode_length}')
-        episode_reward = 0
-        episode_length = 0
-
-    masks.fill_(0.0 if done else 1.0)
-
-    if args.env_name.find('Bullet') > -1:
-        if torsoId > -1:
-            distance = 5
-            yaw = 0
-            humanPos, humanOrn = p.getBasePositionAndOrientation(torsoId)
-            p.resetDebugVisualizerCamera(distance, yaw, -20, humanPos)
-
-    if render_func is not None:
+if args.still:
+    while True:
         render_func('human')
+else:
+    while True:
+        if actor_critic is None:
+            if args.random:
+                action = torch.tensor(env.action_space.sample())
+            else:
+                action = torch.zeros(env.action_space.shape)
+        else:
+            with torch.no_grad():
+                value, action, _, recurrent_hidden_states = actor_critic.act(
+                    obs, recurrent_hidden_states, masks, deterministic=args.det)
+
+        # Obser reward and next obs
+        obs, reward, done, _ = env.step(action)
+        episode_reward += reward.numpy()[0][0]
+        episode_length += 1
+
+        if done:
+            print(f'Episode reward {episode_reward}, length {episode_length}')
+            episode_reward = 0
+            episode_length = 0
+
+        masks.fill_(0.0 if done else 1.0)
+
+        if args.env_name.find('Bullet') > -1:
+            if torsoId > -1:
+                distance = 5
+                yaw = 0
+                humanPos, humanOrn = p.getBasePositionAndOrientation(torsoId)
+                p.resetDebugVisualizerCamera(distance, yaw, -20, humanPos)
+
+        if render_func is not None:
+            render_func('human')
