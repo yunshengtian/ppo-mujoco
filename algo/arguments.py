@@ -52,7 +52,7 @@ def get_args():
     parser.add_argument(
         '--num-processes',
         type=int,
-        default=1,
+        default=4,
         help='how many training CPU processes to use (default: 16)')
     parser.add_argument(
         '--num-steps',

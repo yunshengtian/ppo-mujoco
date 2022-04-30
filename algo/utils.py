@@ -1,13 +1,47 @@
+import yaml
 import glob
 import os
-
-import torch
 import torch.nn as nn
-
+import argparse
+import logging
 from algo.envs import VecNormalize
 
 
+def get_logger(name: str, seed: int):
+    logger = logging.getLogger(name)
+
+    file_path = f"./logging/{name}_{seed}.log"
+    hdlr = logging.FileHandler(file_path)
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+    hdlr.setFormatter(formatter)
+    logger.addHandler(hdlr)
+    logger.setLevel(logging.INFO)
+    return logger
+
+
+def get_config():
+    parser = argparse.ArgumentParser(description="config")
+    parser.add_argument(
+        "--config",
+        nargs="?",
+        type=str,
+        default="./configs/mujoco/clean.yaml",
+        help="Configuration file to use",
+    )
+
+    args = parser.parse_args()
+
+    with open(args.config) as fp:
+        cfg = yaml.load(fp, Loader=yaml.FullLoader)
+
+    if not cfg["id"]:
+        raise ValueError('"id" should not be none in config yaml')
+
+    return cfg
+
 # Get a render function
+
+
 def get_render_func(venv):
     if hasattr(venv, 'envs'):
         return venv.envs[0].render

@@ -4,8 +4,6 @@ import torch
 from algo import utils
 from algo.envs import make_vec_envs
 
-import envs
-
 
 def evaluate(actor_critic, ob_rms, env_name, seed, num_processes, eval_log_dir,
              device):
