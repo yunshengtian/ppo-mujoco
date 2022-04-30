@@ -1,4 +1,4 @@
-name: ppo-mujoco
+name: 7000
 channels:
   - conda-forge
   - anaconda
