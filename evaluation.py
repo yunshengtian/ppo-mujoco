@@ -1,13 +1,12 @@
 import numpy as np
 import torch
-
-from algo import utils
 from env import get_env
 
 
 def evaluate(actor_critic, cfg, num_processes, writer,
              device, eval_step, logger):
-    eval_envs = get_env(cfg=cfg, device=device, seed=cfg['seed'] + 1000)
+    eval_envs = get_env(cfg=cfg, num_workers=num_processes,
+                        device=device, seed=cfg['seed'] + 1000)
     eval_episode_rewards = []
 
     obs = eval_envs.reset()
@@ -41,14 +40,16 @@ def evaluate(actor_critic, cfg, num_processes, writer,
     median_reward = np.median(eval_episode_rewards).item()
     min_reward = np.min(eval_episode_rewards).item()
     max_reward = np.max(eval_episode_rewards).item()
-    writer.add_scalar(tag="Mean Reward Of Last 10 Episode Rewards",
+    writer.add_scalar(tag="Eval Mean Reward Of Last 10 Episode Rewards",
                       scalar_value=mean_reward, global_step=eval_step)
-    writer.add_scalar(tag="Median Reward Of Last 10 Episode Rewards",
+    writer.add_scalar(tag="Eval Median Reward Of Last 10 Episode Rewards",
                       scalar_value=median_reward, global_step=eval_step)
-    writer.add_scalar(tag="Min Reward Of Last 10 Episode Rewards",
+    writer.add_scalar(tag="Eval Min Reward Of Last 10 Episode Rewards",
                       scalar_value=min_reward, global_step=eval_step)
-    writer.add_scalar(tag="Max Reward Of Last 10 Episode Rewards",
+    writer.add_scalar(tag="Eval Max Reward Of Last 10 Episode Rewards",
                       scalar_value=max_reward, global_step=eval_step)
 
     logger.info(
-        f'Step:{eval_step}, mean reward: {mean_reward}, median reward: {median_reward}, min reward: {min_reward}, max_reward: {max_reward}')
+        f'Eval Number:{eval_step}, mean reward: {mean_reward}, median reward: {median_reward}, min reward: {min_reward}, max_reward: {max_reward}')
+    
+    return mean_reward

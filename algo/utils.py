@@ -2,15 +2,44 @@ import yaml
 import glob
 import os
 import torch.nn as nn
+import torch
 import argparse
 import logging
 from algo.envs import VecNormalize
 
 
-def get_logger(name: str, seed: int):
+def save_model(save_path, agent, epoch, is_best: False):
+    try:
+        os.makedirs(save_path)
+    except OSError:
+        pass
+
+    file_name = "checkpoint.pt"
+
+    if is_best:
+        file_name = 'best_' + file_name
+
+    torch.save(
+        {
+            "epoch": epoch,
+            "model_state_dict": agent.actor_critic.state_dict(),
+            "optimizer_state_dict": agent.optimizer.state_dict(),
+        },
+        os.path.join(save_path, file_name))
+
+
+def get_logger(cfg):
+    name = cfg['id']
+    save_path = os.path.join(
+        "./logging", cfg['task'], cfg["algorithm"], cfg["id"], str(cfg['seed']))
     logger = logging.getLogger(name)
 
-    file_path = f"./logging/{name}_{seed}.log"
+    try:
+        os.makedirs(save_path)
+    except OSError:
+        pass
+
+    file_path = os.path.join(save_path, 'logger.log')
     hdlr = logging.FileHandler(file_path)
     formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
     hdlr.setFormatter(formatter)

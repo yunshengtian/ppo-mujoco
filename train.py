@@ -10,7 +10,7 @@ import torch
 from algo import PPO, utils
 from algo.model import Policy
 from algo.storage import RolloutStorage
-from algo.utils import get_vec_normalize, get_config, get_logger
+from algo.utils import get_vec_normalize, get_config, get_logger, save_model
 from evaluation import evaluate
 from env import get_env
 from torch.utils.tensorboard import SummaryWriter
@@ -28,10 +28,7 @@ def main(cfg: dict):
         "./checkpoints", task, cfg["algorithm"], cfg["id"], str(seed))
     algo_args = cfg['train']['algorithm_params']
 
-    logger = get_logger(
-        name=cfg["id"],
-        seed=seed,
-    )
+    logger = get_logger(cfg=cfg)
     logger.info(cfg)
     writer = SummaryWriter(log_dir=os.path.join(
         "./tb_logs", task, cfg["algorithm"], cfg["id"]))
@@ -80,6 +77,7 @@ def main(cfg: dict):
     episode_rewards = deque(maxlen=10)
 
     start = time.time()
+    max_mean_eval_reward = float('-inf')
     num_updates = int(num_env_steps) // num_steps // num_workers
     logger.info(f"Number of updates is set to: {num_updates}")
     logger.info(f"Training Begins!")
@@ -139,10 +137,7 @@ def main(cfg: dict):
 
             logger.info(f"num update: {j}. Saving checkpoint...")
 
-            torch.save([
-                actor_critic,
-                getattr(utils.get_vec_normalize(envs), 'ob_rms', None)
-            ], os.path.join(save_path, "checkpoint.pt"))
+            save_model(save_path=save_path, epoch=j, agent=agent)
 
         if j % log_interval == 0 and len(episode_rewards) > 1:
             total_num_steps = (j + 1) * num_workers * num_steps
@@ -170,11 +165,14 @@ def main(cfg: dict):
             logger.info(
                 f'Step:{total_num_steps}/{int(cfg["train"]["num_env_steps"])}, mean reward: {mean_reward}, median reward: {median_reward}, min reward: {min_reward}, max_reward: {max_reward}')
 
-        if (cfg['eval_interval'] is not None and len(episode_rewards) > 1
-                and j % cfg['eval_interval'] == 0):
-            eval_step = j // cfg['eval_interval']
-            evaluate(actor_critic=actor_critic, cfg=cfg,
-                     num_processes=num_workers, writer=writer, eval_step=eval_step, device=device)
+        if len(episode_rewards > 1 and j % cfg['eval_interval'] == 0):
+            eval_step = int(j // cfg['eval_interval']) + 1
+            mean_eval_return = evaluate(actor_critic=actor_critic, cfg=cfg, logger=logger,
+                                        num_processes=num_workers, writer=writer, eval_step=eval_step, device=device)
+
+            if mean_eval_return > max_mean_eval_reward:
+                max_mean_eval_reward = mean_eval_return
+                save_model(save_path=save_path, epoch=j, agent=agent, is_best=True)
 
     logger.info(
         f'Total Time To Complete: {str(datetime.timedelta(seconds=end - start))}')
