@@ -6,8 +6,9 @@ from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.vec_env import VecEnvWrapper
 
 
-def get_env(cfg, num_workers, device):
-    seed = cfg["seed"]
+def get_env(cfg, num_workers, device, seed =None):
+    if seed is None:
+        seed = cfg["seed"]
     num_frame_stack = cfg["num_frame_stack"]
     venv = make_vec_env(SB3gym, n_envs=num_workers,
                         seed=seed, env_kwargs={"cfg": cfg})

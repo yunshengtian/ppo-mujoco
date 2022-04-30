@@ -1,21 +1,23 @@
 import os
 import time
+import json
+import datetime
 from collections import deque
 
 import numpy as np
 import torch
 
 from algo import PPO, utils
-from algo.arguments import get_args
 from algo.model import Policy
 from algo.storage import RolloutStorage
 from algo.utils import get_vec_normalize, get_config, get_logger
 from evaluation import evaluate
-
 from env import get_env
+from torch.utils.tensorboard import SummaryWriter
 
 
 def main(cfg: dict):
+    task = cfg['task']
     seed = cfg['seed']
     num_workers = cfg['num_workers']
     num_steps = cfg['train']['num_steps']
@@ -23,8 +25,16 @@ def main(cfg: dict):
     save_interval = cfg["train"]["save_interval"]
     log_interval = cfg["log_interval"]
     save_path = os.path.join(
-        "./checkpoints", cfg["algorithm"], cfg["id"], str(seed))
+        "./checkpoints", task, cfg["algorithm"], cfg["id"], str(seed))
     algo_args = cfg['train']['algorithm_params']
+
+    logger = get_logger(
+        name=cfg["id"],
+        seed=seed,
+    )
+    logger.info(cfg)
+    writer = SummaryWriter(log_dir=os.path.join(
+        "./tb_logs", task, cfg["algorithm"], cfg["id"]))
     # args = get_args()
 
     # log_dir = os.path.expanduser(args.log_dir)
@@ -71,6 +81,8 @@ def main(cfg: dict):
 
     start = time.time()
     num_updates = int(num_env_steps) // num_steps // num_workers
+    logger.info(f"Number of updates is set to: {num_updates}")
+    logger.info(f"Training Begins!")
     for j in range(num_updates):
 
         if not cfg['train']['disable_linear_lr_decay']:
@@ -120,6 +132,13 @@ def main(cfg: dict):
             except OSError:
                 pass
 
+            if j == 0:
+                with open(os.path.join(save_path, "config.json"), "w") as output:
+                    logger.info(f"num update: {j}. Saving config.yaml...")
+                    json.dump(cfg, output)
+
+            logger.info(f"num update: {j}. Saving checkpoint...")
+
             torch.save([
                 actor_critic,
                 getattr(utils.get_vec_normalize(envs), 'ob_rms', None)
@@ -128,20 +147,38 @@ def main(cfg: dict):
         if j % log_interval == 0 and len(episode_rewards) > 1:
             total_num_steps = (j + 1) * num_workers * num_steps
             end = time.time()
-            print(
-                "Updates {}, num timesteps {}, FPS {} \n Last {} training episodes: mean/median reward {:.1f}/{:.1f}, min/max reward {:.1f}/{:.1f}\n"
-                .format(j, total_num_steps,
-                        int(total_num_steps / (end - start)),
-                        len(episode_rewards), np.mean(episode_rewards),
-                        np.median(episode_rewards), np.min(episode_rewards),
-                        np.max(episode_rewards), dist_entropy, value_loss,
-                        action_loss))
+            mean_reward = np.mean(episode_rewards).item()
+            median_reward = np.median(episode_rewards).item()
+            min_reward = np.min(episode_rewards).item()
+            max_reward = np.max(episode_rewards).item()
+            writer.add_scalar(tag='FPS', scalar_value=int(
+                total_num_steps / (end - start)), global_step=total_num_steps)
+            writer.add_scalar(tag="Mean Reward Of Last 10 Episode Rewards",
+                              scalar_value=mean_reward, global_step=total_num_steps)
+            writer.add_scalar(tag="Median Reward Of Last 10 Episode Rewards",
+                              scalar_value=median_reward, global_step=total_num_steps)
+            writer.add_scalar(tag="Min Reward Of Last 10 Episode Rewards",
+                              scalar_value=min_reward, global_step=total_num_steps)
+            writer.add_scalar(tag="Max Reward Of Last 10 Episode Rewards",
+                              scalar_value=max_reward, global_step=total_num_steps)
+            writer.add_scalar(tag="Distribution Entropy At Num Step",
+                              scalar_value=dist_entropy, global_step=total_num_steps)
+            writer.add_scalar(tag="Value Loss At Num Step",
+                              scalar_value=value_loss, global_step=total_num_steps)
+            writer.add_scalar(tag="Action Loss At Num Step",
+                              scalar_value=action_loss, global_step=total_num_steps)
+            logger.info(
+                f'Step:{total_num_steps}/{int(cfg["train"]["num_env_steps"])}, mean reward: {mean_reward}, median reward: {median_reward}, min reward: {min_reward}, max_reward: {max_reward}')
 
-        # if (args.eval_interval is not None and len(episode_rewards) > 1
-        #         and j % args.eval_interval == 0):
-        #     ob_rms = utils.get_vec_normalize(envs).ob_rms
-        #     evaluate(actor_critic, ob_rms, args.env_name, seed,
-        #              num_workers, eval_log_dir, device)
+        if (cfg['eval_interval'] is not None and len(episode_rewards) > 1
+                and j % cfg['eval_interval'] == 0):
+            eval_step = j // cfg['eval_interval']
+            evaluate(actor_critic=actor_critic, cfg=cfg,
+                     num_processes=num_workers, writer=writer, eval_step=eval_step, device=device)
+
+    logger.info(
+        f'Total Time To Complete: {str(datetime.timedelta(seconds=end - start))}')
+    writer.close()
 
 
 if __name__ == "__main__":

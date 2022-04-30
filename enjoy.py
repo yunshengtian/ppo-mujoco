@@ -52,7 +52,7 @@ args.det = not args.non_det
 
 env = make_vec_envs(
     args.env_name,
-    args.seed + 1000,
+    args.seed + 3000,
     1,
     None,
     None,
