@@ -101,5 +101,4 @@ venv.bak/
 /site
 
 checkpoints/
-logs/
 .fuse_hidden*
