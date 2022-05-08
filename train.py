@@ -14,6 +14,7 @@ from algo.utils import get_vec_normalize, get_config, get_logger, save_model
 from evaluation import evaluate
 from env import get_env
 from torch.utils.tensorboard import SummaryWriter
+from augmentations.Augmenter import Augmenter
 
 
 def main(cfg: dict):
@@ -45,6 +46,14 @@ def main(cfg: dict):
 
     envs = get_env(cfg=cfg, num_workers=num_workers, device=device)
 
+    if 'augmentation' not in cfg['train'] or cfg['train']['augmentation'] is None:
+        augmenter = None
+        logger.info('No augmenter parameters given. No augmenter set')
+    else:
+        augmenter = Augmenter(cfg=cfg)
+        logger.info(
+            f"Augmenter set. Parameters: {cfg['train']['augmentation']}")
+
     actor_critic = Policy(
         envs.observation_space.shape,
         envs.action_space)
@@ -64,7 +73,10 @@ def main(cfg: dict):
     #         vec_norm.eval()
     #         vec_norm.ob_rms = ob_rms
 
-    agent = PPO(actor_critic=actor_critic, **algo_args)
+    if cfg['algorithm'] == 'PPO':
+        agent = PPO(actor_critic=actor_critic, **algo_args)
+    else:
+        raise ValueError(f"Given non valid algorithm:{cfg['algorithm']}")
 
     rollouts = RolloutStorage(num_steps=num_steps, num_processes=num_workers,
                               obs_shape=envs.observation_space.shape, action_space=envs.action_space,
@@ -119,7 +131,9 @@ def main(cfg: dict):
         rollouts.compute_returns(
             next_value=next_value, **cfg['train']['compute_returns'])
 
-        value_loss, action_loss, dist_entropy = agent.update(rollouts)
+        if cfg['algorithm'] == 'PPO':
+            value_loss, action_loss, dist_entropy = agent.update(
+                rollouts=rollouts, augmenter=augmenter)
 
         rollouts.after_update()
 
@@ -172,7 +186,8 @@ def main(cfg: dict):
 
             if mean_eval_return > max_mean_eval_reward:
                 max_mean_eval_reward = mean_eval_return
-                save_model(save_path=save_path, epoch=j, agent=agent, is_best=True)
+                save_model(save_path=save_path, epoch=j,
+                           agent=agent, is_best=True)
 
     logger.info(
         f'Total Time To Complete: {str(datetime.timedelta(seconds=end - start))}')

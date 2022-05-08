@@ -9,7 +9,7 @@ log_interval: 1
 num_workers: 8
 eval_interval: 1
 algorithm: PPO
-train:
+train: 
   save_interval: 5
   num_steps: 2048
   num_env_steps: 100000000

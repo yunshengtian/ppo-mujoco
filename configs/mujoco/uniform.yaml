@@ -4,13 +4,15 @@ num_frame_stack: 4
 screen_height: 100
 screen_width: 100
 seed: 1234
-device_id: 2
+device_id: 3
 log_interval: 1
 num_workers: 8
 eval_interval: 1
 algorithm: PPO
 train:
-  aug: []
+  augmentation: 
+    augs: ['crop', 'no_aug', 'translate', 'color_jitter']
+    distribution:  [0.25, 0.25, 0.25, 0.25]
   save_interval: 5
   num_steps: 2048
   num_env_steps: 100000000
