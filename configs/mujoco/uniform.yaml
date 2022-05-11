@@ -11,7 +11,7 @@ eval_interval: 1
 algorithm: PPO
 train:
   augmentation: 
-    augs: ['crop', 'no_aug', 'translate', 'color_jitter']
+    augs: ['cutout', 'no_aug', 'translate', 'color_jitter']
     distribution:  [0.25, 0.25, 0.25, 0.25]
   save_interval: 5
   num_steps: 2048
