@@ -77,6 +77,10 @@ class Augmenter:
         for idx in unique_idxes:
             aug = self.augs[augs_list[idx]]
             selected_idxes = (sampled_idxes == idx).nonzero().flatten()
-            obs_augmented[selected_idxes] = aug(input[selected_idxes])
+            tnsr_augmented = aug(input[selected_idxes])
+
+            assert tnsr_augmented.dtype is torch.IntTensor
+
+            obs_augmented[selected_idxes] = tnsr_augmented
 
         return obs_augmented
