@@ -4,7 +4,7 @@ num_frame_stack: 4
 screen_height: 100
 screen_width: 100
 seed: 1234
-device_id: 3
+device_id: 
 log_interval: 1
 num_workers: 8
 eval_interval: 1
