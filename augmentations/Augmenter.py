@@ -6,7 +6,6 @@ import augmentations.new_augs as new_augs
 aug_to_func = {
     # 'crop': rad.random_crop,
     'grayscale': rad.random_grayscale,
-    'full_grayscale': rad.grayscale,
     'cutout': rad.random_cutout,
     'cutout_color': rad.random_cutout_color,
     # 'flip': rad.random_flip,

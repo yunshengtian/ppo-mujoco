@@ -4,7 +4,7 @@ num_frame_stack: 4
 screen_height: 100
 screen_width: 100
 seed: 1234
-device_id: 0
+device_id: 3
 log_interval: 1
 num_workers: 8
 eval_interval: 1
@@ -31,4 +31,4 @@ train:
     max_grad_norm: 0.5
     use_clipped_value_loss: True
 validation:
-  augmentation: ['no_aug', 'full_grayscale']
+  augmentation: ['no_aug', 'grayscale']
