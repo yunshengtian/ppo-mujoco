@@ -1,6 +1,5 @@
-# Tested Augmentations
+# Validated Augmentations
 All augmentations should take frame stacked PyTorch tensors and output tensors as well.  
-
 Tested Augmentations:
 - Random Grayscale
 - Random Convolution
