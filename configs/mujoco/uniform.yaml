@@ -6,13 +6,15 @@ screen_width: 100
 seed: 1234
 device_id: 3
 log_interval: 1
-num_workers: 8
+num_workers: 16
 eval_interval: 1
 algorithm: PPO
 train:
   augmentation: 
-    augs: ['cutout', 'no_aug', 'translate', 'color_jitter']
-    distribution:  [0.25, 0.25, 0.25, 0.25]
+    augs: ['cutout_color', 'rotate', 'rand_conv']
+    distribution:  [0.333333333, 0.33333333, 0.33333333]
+    batch_sz: 64
+    is_full: False
   save_interval: 5
   num_steps: 2048
   num_env_steps: 100000000
@@ -32,3 +34,5 @@ train:
     eps: 0.00001
     max_grad_norm: 0.5
     use_clipped_value_loss: True
+validation:
+  augmentation: ['no_aug', 'full_grayscale']

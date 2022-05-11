@@ -6,7 +6,7 @@ screen_width: 100
 seed: 1234
 device_id: 2
 log_interval: 1
-num_workers: 8
+num_workers: 16
 eval_interval: 1
 algorithm: PPO
 train: 
@@ -30,3 +30,5 @@ train:
     eps: 0.00001
     max_grad_norm: 0.5
     use_clipped_value_loss: True
+validation:
+  augmentation: ['no_aug', 'full_grayscale']

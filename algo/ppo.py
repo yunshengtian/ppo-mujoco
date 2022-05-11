@@ -60,7 +60,7 @@ class PPO():
                         obs_batch, recurrent_hidden_states_batch, masks_batch,
                         actions_batch)
                 else:
-                    aug_obs_batch = augmenter.augment_tensors(obs_batch)
+                    aug_obs_batch = augmenter.augment_tensors_in_batches(input=obs_batch)
                     # Reshape to do in a single forward pass for all steps
                     values, action_log_probs, dist_entropy, _ = self.actor_critic.evaluate_actions(
                         aug_obs_batch, recurrent_hidden_states_batch, masks_batch,

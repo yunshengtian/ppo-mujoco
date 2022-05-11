@@ -179,7 +179,7 @@ def main(cfg: dict):
             logger.info(
                 f'Step:{total_num_steps}/{int(cfg["train"]["num_env_steps"])}, mean reward: {mean_reward}, median reward: {median_reward}, min reward: {min_reward}, max_reward: {max_reward}')
 
-        if len(episode_rewards > 1 and j % cfg['eval_interval'] == 0):
+        if len(episode_rewards) > 1 and j % cfg['eval_interval'] == 0:
             eval_step = int(j // cfg['eval_interval']) + 1
             mean_eval_return = evaluate(actor_critic=actor_critic, cfg=cfg, logger=logger,
                                         num_processes=num_workers, writer=writer, eval_step=eval_step, device=device)

@@ -8,7 +8,7 @@ import logging
 from algo.envs import VecNormalize
 
 
-def save_model(save_path, agent, epoch, is_best: False):
+def save_model(save_path, agent, epoch, is_best: bool = False):
     try:
         os.makedirs(save_path)
     except OSError:
