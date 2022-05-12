@@ -12,7 +12,7 @@ algorithm: PPO
 train: 
   save_interval: 5
   num_steps: 2048
-  num_env_steps: 100000000
+  num_env_steps: 15000000
   disable_linear_lr_decay: False
   aug:
   compute_returns:

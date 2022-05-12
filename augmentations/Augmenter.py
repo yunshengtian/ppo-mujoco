@@ -8,7 +8,7 @@ aug_to_func = {
     'grayscale': rad.random_grayscale,
     'cutout': rad.random_cutout,
     'cutout_color': rad.random_cutout_color,
-    # 'flip': rad.random_flip,
+    'flip': rad.random_flip,
     'rotate': rad.random_rotation,
     'rand_conv': rad.random_convolution,
     # 'color_jitter': rad.random_color_jitter,
