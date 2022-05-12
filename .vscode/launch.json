@@ -22,6 +22,15 @@
             "justMyCode": false
         },
         {
+            "name": "Larget Set Train",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/train.py",
+            "console": "integratedTerminal",
+            "args": ["--config", "./configs/mujoco/large_set.yaml"],
+            "justMyCode": false
+        },
+        {
             "name": "Uniform Train",
             "type": "python",
             "request": "launch",
