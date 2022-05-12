@@ -1,0 +1,38 @@
+id: large_set
+task: HalfCheetah-v3
+num_frame_stack: 4
+screen_height: 100
+screen_width: 100
+seed: 1234
+device_id: 
+log_interval: 1
+num_workers: 8
+eval_interval: 1
+algorithm: PPO
+train:
+  augmentation: 
+    augs: ['rotate', 'flip']
+    distribution:  [0.5, 0.5]
+    batch_sz: 64
+    is_full: False
+  save_interval: 5
+  num_steps: 2048
+  num_env_steps: 15000000
+  disable_linear_lr_decay: False
+  compute_returns:
+    use_gae: True
+    gae_lambda: 0.95
+    gamma: 0.99
+    use_proper_time_limits: True
+  algorithm_params:
+    clip_param: 0.2
+    ppo_epoch: 10
+    num_mini_batch: 32
+    value_loss_coef: 0.5
+    entropy_coef: 0
+    lr: 0.0003
+    eps: 0.00001
+    max_grad_norm: 0.5
+    use_clipped_value_loss: True
+validation:
+  augmentation: ['no_aug', 'grayscale']
