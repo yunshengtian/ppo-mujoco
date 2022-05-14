@@ -1,0 +1,11 @@
+Getting DMC working:
+
+export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libGLEW.so 
+xvfb-run -a -s "-screen 0 1400x900x24" bash
+
+Ensure This Runs:
+python -c "import mujoco_py"
+
+Might Need:
+sudo apt-get install libglew-dev
+pip install patchelf

@@ -36,7 +36,6 @@ class Augmenter:
             raise ValueError(
                 'Len of list of augs does not equal number of bins in Categorical distribution')
 
-        self.batch_sz = cfg['train']['augmentation']['batch_sz']
         self.is_full = cfg['train']['augmentation']['is_full']
 
         self.augs = dict()
@@ -52,14 +51,9 @@ class Augmenter:
         self.aug_keys = list(self.augs.keys())
 
     def augment_tensors_in_batches(self, input):
-        if self.is_full:
-            self.batch_sz = input.shape[0]
-
-        idxes_arr = np.random.choice(
-            input.shape[0], self.batch_sz, replace=False)
         inputs_augmented = torch.clone(input)
 
-        for idx in idxes_arr:
+        for idx in range(inputs_augmented.shape[0]):
             sampled_aug = np.random.choice(
                 self.aug_keys, 1, p=self.probs_list)[0]
             print(f"Applying aug: {sampled_aug}")
