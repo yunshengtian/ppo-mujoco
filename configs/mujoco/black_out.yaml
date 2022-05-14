@@ -1,4 +1,4 @@
-id: black_out
+id: black_out_full
 task: HalfCheetah-v3
 num_frame_stack: 4
 screen_height: 100
@@ -13,8 +13,8 @@ train:
   augmentation: 
     augs: ['cutout_color', 'rotate', 'rand_conv', 'blackout']
     distribution:  [0.25, 0.25, 0.25, 0.25]
-    batch_sz: 64
-    is_full: False
+    batch_sz: 
+    is_full: True
   save_interval: 5
   num_steps: 2048
   num_env_steps: 15000000

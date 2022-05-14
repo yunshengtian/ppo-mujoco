@@ -6,9 +6,9 @@ from gym import spaces
 class SB3gym(gym.Env):
     def __init__(self, cfg: dict):
         super(SB3gym, self).__init__()
-        self.width = 100 # TODO!!! cfg["screen_width"]
-        self.height = 100 # TODO!!! cfg["screen_height"]
-        self.env = gym.make('HalfCheetah-v2') # gym.make(cfg["task"])
+        self.width = cfg["screen_width"]
+        self.height = cfg["screen_height"]
+        self.env = gym.make(cfg["task"])
         self.action_space = self.env.action_space
         self.observation_space = self.env.observation_space
 

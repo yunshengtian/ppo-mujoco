@@ -170,12 +170,15 @@ def main(cfg: dict):
                               scalar_value=min_reward, global_step=total_num_steps)
             writer.add_scalar(tag="Max Reward Of Last 10 Episode Rewards",
                               scalar_value=max_reward, global_step=total_num_steps)
-            writer.add_scalar(tag="Distribution Entropy At Num Step",
-                              scalar_value=dist_entropy, global_step=total_num_steps)
-            writer.add_scalar(tag="Value Loss At Num Step",
-                              scalar_value=value_loss, global_step=total_num_steps)
-            writer.add_scalar(tag="Action Loss At Num Step",
-                              scalar_value=action_loss, global_step=total_num_steps)
+            
+            if cfg['algorithm'] == 'PPO':
+                writer.add_scalar(tag="Distribution Entropy At Num Step",
+                                scalar_value=dist_entropy, global_step=total_num_steps)
+                writer.add_scalar(tag="Value Loss At Num Step",
+                                scalar_value=value_loss, global_step=total_num_steps)
+                writer.add_scalar(tag="Action Loss At Num Step",
+                                scalar_value=action_loss, global_step=total_num_steps)
+                                
             logger.info(
                 f'Step:{total_num_steps}/{int(cfg["train"]["num_env_steps"])}, mean reward: {mean_reward}, median reward: {median_reward}, min reward: {min_reward}, max_reward: {max_reward}')
 
