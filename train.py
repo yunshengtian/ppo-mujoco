@@ -50,7 +50,7 @@ def main(cfg: dict):
         augmenter = None
         logger.info('No augmenter parameters given. No augmenter set')
     else:
-        augmenter = Augmenter(cfg=cfg)
+        augmenter = Augmenter(cfg=cfg, device=device)
         logger.info(
             f"Augmenter set. Parameters: {cfg['train']['augmentation']}")
 
@@ -178,7 +178,7 @@ def main(cfg: dict):
                                 scalar_value=value_loss, global_step=total_num_steps)
                 writer.add_scalar(tag="Action Loss At Num Step",
                                 scalar_value=action_loss, global_step=total_num_steps)
-                                
+
             logger.info(
                 f'Step:{total_num_steps}/{int(cfg["train"]["num_env_steps"])}, mean reward: {mean_reward}, median reward: {median_reward}, min reward: {min_reward}, max_reward: {max_reward}')
 

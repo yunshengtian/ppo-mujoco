@@ -19,7 +19,7 @@ aug_to_func = {
 def create_aug_func_dict(augs_list):
     augs_func_dict = dict()
     for aug_name in augs_list:
-        if aug_name is 'crop' or aug_name is 'translate':
+        if aug_name == 'crop' or aug_name == 'translate':
             continue
 
         assert aug_name in aug_to_func.keys()
@@ -29,7 +29,7 @@ def create_aug_func_dict(augs_list):
 
 
 class Augmenter:
-    def __init__(self, cfg: dict) -> None:
+    def __init__(self, cfg: dict, device: str) -> None:
         # TODO: Add post aug sizing to CFG
         augs = cfg['train']['augmentation']['augs']
         self.probs_list = cfg['train']['augmentation']['distribution']
@@ -40,6 +40,7 @@ class Augmenter:
 
         self.batch_sz = cfg['train']['augmentation']['batch_sz']
         self.is_full = cfg['train']['augmentation']['is_full']
+        self.device = device
 
         self.augs = dict()
 
@@ -80,7 +81,7 @@ class Augmenter:
             inputs_augmented[i] = self.augs[sampled_aug](
                 input[idx].unsqueeze(dim=0)).squeeze(0)
 
-        return inputs_augmented
+        return inputs_augmented.to(device=self.device)
 
     def augment_tensors(self, input):
         sampled_idxes = self.sampling_distribution.sample(
@@ -106,4 +107,4 @@ class Augmenter:
 
             obs_augmented[selected_idxes] = tnsr_augmented
 
-        return obs_augmented
+        return obs_augmented.to(device=self.device)
