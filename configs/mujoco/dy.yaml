@@ -6,7 +6,7 @@ screen_width: 100
 seed: 1234
 device_id: 
 log_interval: 1
-num_workers: 8
+num_workers: 10
 eval_interval: 1
 algorithm: Aug_PPO
 augs: ['cutout_color', 'rotate', 'rand_conv', 'blackout', 'cutout', 'flip']
