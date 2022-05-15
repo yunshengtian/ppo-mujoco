@@ -82,7 +82,7 @@ class Policy(nn.Module):
 
 class DiscreteAugmenter(nn.Module):
     def __init__(self, num_augs: int) -> None:
-        super().__init__()
+        super(DiscreteAugmenter, self).__init__()
         self.num_augs = num_augs
         self.tau = torch.nn.Sequential(torch.nn.Linear(1, 1),
                                        torch.nn.ReLU())
@@ -97,11 +97,11 @@ class DiscreteAugmenter(nn.Module):
 
 class AugPolicy(Policy):
     def __init__(self, obs_shape, action_space, augs_list, base=None, base_kwargs=None):
+        super(AugPolicy, self).__init__(obs_shape=obs_shape,
+                                        action_space=action_space, base=base, base_kwargs=base_kwargs)
         self.augs_func_list = create_aug_func_list(augs_list=augs_list)
         self.num_augs = len(augs_list)
         self.augmenter = DiscreteAugmenter(num_augs=self.num_augs)
-        super(Policy, self).__init__(obs_shape=obs_shape,
-                                     action_space=action_space, base=base, base_kwargs=base_kwargs)
 
     def evaluate_actions(self, inputs, rnn_hxs, masks, action):
         sampled_tensor = self.augmenter.forward()

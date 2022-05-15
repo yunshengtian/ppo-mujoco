@@ -59,8 +59,8 @@ def main(cfg: dict):
             envs.observation_space.shape,
             envs.action_space)
     elif cfg['algorithm'] == 'Aug_PPO':
-        actor_critic = AugPolicy(obs_shape=envs.observation_space,
-                                 action_space=envs.action_space, augs_list=cfg['aug'])
+        actor_critic = AugPolicy(obs_shape=envs.observation_space.shape,
+                                 action_space=envs.action_space, augs_list=cfg['augs'])
     else:
         raise NotImplementedError
 

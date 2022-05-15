@@ -36,7 +36,7 @@ def create_aug_func_list(augs_list: list):
             continue
 
         assert aug_name in aug_to_func.keys()
-        augs_func_list[aug_name] = aug_to_func[aug_name]
+        augs_func_list.append(aug_to_func[aug_name])
 
     return augs_func_list
 
