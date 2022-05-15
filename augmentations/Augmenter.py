@@ -16,7 +16,7 @@ aug_to_func = {
 }
 
 
-def create_aug_func_dict(augs_list):
+def create_aug_func_dict(augs_list: list):
     augs_func_dict = dict()
     for aug_name in augs_list:
         if aug_name == 'crop' or aug_name == 'translate':
@@ -26,6 +26,19 @@ def create_aug_func_dict(augs_list):
         augs_func_dict[aug_name] = aug_to_func[aug_name]
 
     return augs_func_dict
+
+
+def create_aug_func_list(augs_list: list):
+    augs_func_list = list()
+    for i in range(len(augs_list)):
+        aug_name = augs_list[i]
+        if aug_name == 'crop' or aug_name == 'translate':
+            continue
+
+        assert aug_name in aug_to_func.keys()
+        augs_func_list[aug_name] = aug_to_func[aug_name]
+
+    return augs_func_list
 
 
 class Augmenter:
@@ -44,6 +57,12 @@ class Augmenter:
 
         self.augs = dict()
 
+        if 'crop' in augs:
+            self.is_crop = True
+
+        if 'translate' in augs:
+            self.is_translate = True
+
         if augs == 'rad':
             self.augs = aug_to_func
             self.is_crop = True
@@ -51,13 +70,9 @@ class Augmenter:
         elif not augs or isinstance(augs, str):
             raise ValueError(
                 f'Augs should string: "rad" or non-empty list not: {augs}')
+        elif cfg['algorithm'] == 'Aug_PPO':
+            raise NotImplementedError
         else:
-            if 'crop' in augs:
-                self.is_crop = True
-
-            if 'translate' in augs:
-                self.is_translate = True
-
             self.augs = create_aug_func_dict(augs_list=augs)
 
         self.aug_keys = list(self.augs.keys())

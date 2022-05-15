@@ -8,7 +8,7 @@ import numpy as np
 import torch
 
 from algo import PPO, utils
-from algo.model import Policy
+from algo.model import Policy, AugPolicy
 from algo.storage import RolloutStorage
 from algo.utils import get_vec_normalize, get_config, get_logger, save_model
 from evaluation import evaluate
@@ -54,9 +54,16 @@ def main(cfg: dict):
         logger.info(
             f"Augmenter set. Parameters: {cfg['train']['augmentation']}")
 
-    actor_critic = Policy(
-        envs.observation_space.shape,
-        envs.action_space)
+    if cfg['algorithm'] == 'PPO':
+        actor_critic = Policy(
+            envs.observation_space.shape,
+            envs.action_space)
+    elif cfg['algorithm'] == 'Aug_PPO':
+        actor_critic = AugPolicy(obs_shape=envs.observation_space,
+                                 action_space=envs.action_space, augs_list=cfg['aug'])
+    else:
+        raise NotImplementedError
+
     actor_critic.to(device)
 
     # if args.load_dir is None:
@@ -73,7 +80,7 @@ def main(cfg: dict):
     #         vec_norm.eval()
     #         vec_norm.ob_rms = ob_rms
 
-    if cfg['algorithm'] == 'PPO':
+    if 'PPO' in cfg['algorithm']:
         agent = PPO(actor_critic=actor_critic, **algo_args)
     else:
         raise ValueError(f"Given non valid algorithm:{cfg['algorithm']}")
@@ -131,7 +138,7 @@ def main(cfg: dict):
         rollouts.compute_returns(
             next_value=next_value, **cfg['train']['compute_returns'])
 
-        if cfg['algorithm'] == 'PPO':
+        if 'PPO' in cfg['algorithm']:
             value_loss, action_loss, dist_entropy = agent.update(
                 rollouts=rollouts, augmenter=augmenter)
 
@@ -170,14 +177,14 @@ def main(cfg: dict):
                               scalar_value=min_reward, global_step=total_num_steps)
             writer.add_scalar(tag="Max Reward Of Last 10 Episode Rewards",
                               scalar_value=max_reward, global_step=total_num_steps)
-            
-            if cfg['algorithm'] == 'PPO':
+
+            if 'PPO' in cfg['algorithm']:
                 writer.add_scalar(tag="Distribution Entropy At Num Step",
-                                scalar_value=dist_entropy, global_step=total_num_steps)
+                                  scalar_value=dist_entropy, global_step=total_num_steps)
                 writer.add_scalar(tag="Value Loss At Num Step",
-                                scalar_value=value_loss, global_step=total_num_steps)
+                                  scalar_value=value_loss, global_step=total_num_steps)
                 writer.add_scalar(tag="Action Loss At Num Step",
-                                scalar_value=action_loss, global_step=total_num_steps)
+                                  scalar_value=action_loss, global_step=total_num_steps)
 
             logger.info(
                 f'Step:{total_num_steps}/{int(cfg["train"]["num_env_steps"])}, mean reward: {mean_reward}, median reward: {median_reward}, min reward: {min_reward}, max_reward: {max_reward}')

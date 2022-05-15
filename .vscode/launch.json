@@ -38,6 +38,15 @@
             "console": "integratedTerminal",
             "args": ["--config", "./configs/mujoco/uniform.yaml"],
             "justMyCode": false
+        },
+        {
+            "name": "Dy Train",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/train.py",
+            "console": "integratedTerminal",
+            "args": ["--config", "./configs/mujoco/dy.yaml"],
+            "justMyCode": false
         }
     ]
 }

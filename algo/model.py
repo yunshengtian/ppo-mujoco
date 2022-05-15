@@ -5,6 +5,7 @@ import torch.nn.functional as F
 
 from algo.distributions import Bernoulli, Categorical, DiagGaussian
 from algo.utils import init
+from augmentations.Augmenter import create_aug_func_list
 
 
 class Flatten(nn.Module):
@@ -79,6 +80,39 @@ class Policy(nn.Module):
         return value, action_log_probs, dist_entropy, rnn_hxs
 
 
+class DiscreteAugmenter(nn.Module):
+    def __init__(self, num_augs: int) -> None:
+        super().__init__()
+        self.num_augs = num_augs
+        self.tau = torch.nn.Sequential(torch.nn.Linear(1, 1),
+                                       torch.nn.ReLU())
+        self.logits = torch.nn.Sequential(torch.nn.Linear(1, self.num_augs),
+                                          torch.nn.Softmax())
+
+    def forward(self):
+        tau = self.tau.forward(torch.ones(1))
+        logits = self.logits.forward(torch.ones(1))
+        return F.gumbel_softmax(logits, tau=tau, hard=True)
+
+
+class AugPolicy(Policy):
+    def __init__(self, obs_shape, action_space, augs_list, base=None, base_kwargs=None):
+        self.augs_func_list = create_aug_func_list(augs_list=augs_list)
+        self.num_augs = len(augs_list)
+        self.augmenter = DiscreteAugmenter(num_augs=self.num_augs)
+        super(Policy, self).__init__(obs_shape=obs_shape,
+                                     action_space=action_space, base=base, base_kwargs=base_kwargs)
+
+    def evaluate_actions(self, inputs, rnn_hxs, masks, action):
+        sampled_tensor = self.augmenter.forward()
+        aug_idx = torch.argmax(sampled_tensor)[0]
+        aug_inputs = inputs.tile(self.num_augs, 1, 1, 1)
+        aug_inputs[aug_idx] = self.augs_func_list[aug_idx](inputs)
+        aug_inputs = torch.sum(aug_inputs, dim=0)
+        return super().evaluate_actions(inputs=aug_inputs,
+                                        rnn_hxs=rnn_hxs, masks=masks, action=action)
+
+
 class NNBase(nn.Module):
     def __init__(self, recurrent, recurrent_input_size, hidden_size):
         super(NNBase, self).__init__()
@@ -126,11 +160,11 @@ class NNBase(nn.Module):
 
             # Let's figure out which steps in the sequence have a zero for any agent
             # We will always assume t=0 has a zero in it as that makes the logic cleaner
-            has_zeros = ((masks[1:] == 0.0) \
-                            .any(dim=-1)
-                            .nonzero()
-                            .squeeze()
-                            .cpu())
+            has_zeros = ((masks[1:] == 0.0)
+                         .any(dim=-1)
+                         .nonzero()
+                         .squeeze()
+                         .cpu())
 
             # +1 to correct the masks[1:]
             if has_zeros.dim() == 0:
@@ -170,8 +204,8 @@ class CNNBase(NNBase):
     def __init__(self, obs_shape, recurrent=False, hidden_size=512):
         super(CNNBase, self).__init__(recurrent, hidden_size, hidden_size)
 
-        init_ = lambda m: init(m, nn.init.orthogonal_, lambda x: nn.init.
-                               constant_(x, 0), nn.init.calculate_gain('relu'))
+        def init_(m): return init(m, nn.init.orthogonal_, lambda x: nn.init.
+                                  constant_(x, 0), nn.init.calculate_gain('relu'))
 
         # self.main = nn.Sequential(
         #     init_(nn.Conv2d(num_inputs, 32, 8, stride=4)), nn.ReLU(),
@@ -198,8 +232,8 @@ class CNNBase(NNBase):
             nn.ReLU(),
         )
 
-        init_ = lambda m: init(m, nn.init.orthogonal_, lambda x: nn.init.
-                               constant_(x, 0))
+        def init_(m): return init(m, nn.init.orthogonal_, lambda x: nn.init.
+                                  constant_(x, 0))
 
         self.critic_linear = init_(nn.Linear(hidden_size, 1))
 
@@ -221,8 +255,8 @@ class MLPBase(NNBase):
         if recurrent:
             num_inputs = hidden_size
 
-        init_ = lambda m: init(m, nn.init.orthogonal_, lambda x: nn.init.
-                               constant_(x, 0), np.sqrt(2))
+        def init_(m): return init(m, nn.init.orthogonal_, lambda x: nn.init.
+                                  constant_(x, 0), np.sqrt(2))
 
         self.actor = nn.Sequential(
             init_(nn.Linear(num_inputs, hidden_size)), nn.Tanh(),
