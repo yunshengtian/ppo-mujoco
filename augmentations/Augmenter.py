@@ -87,6 +87,8 @@ class Augmenter:
 
         inputs_augmented = torch.zeros(
             tuple([self.batch_sz] + list(input.shape[1:])))
+        
+        # TODO: Optimize this
 
         for i in range(len(idxes_arr)):
             idx = idxes_arr[i]
