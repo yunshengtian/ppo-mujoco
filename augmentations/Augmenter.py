@@ -55,6 +55,7 @@ class Augmenter:
         self.is_full = cfg['train']['augmentation']['is_full']
         self.device = device
 
+        # TODO: Change to list rather than dict
         self.augs = dict()
 
         if 'crop' in augs:
