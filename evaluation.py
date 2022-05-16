@@ -4,8 +4,7 @@ from env import get_env
 from augmentations.Augmenter import create_aug_func_dict
 
 
-def evaluate(actor_critic, cfg, num_processes, writer,
-             device, eval_step, logger):
+def evaluate(actor_critic, cfg, num_processes, device, eval_step, writer=None, logger=None):
     augs_dict = create_aug_func_dict(
         augs_list=cfg['validation']['augmentation'])
     mean_reward_list = list()
@@ -47,17 +46,20 @@ def evaluate(actor_critic, cfg, num_processes, writer,
         median_reward = np.median(eval_episode_rewards).item()
         min_reward = np.min(eval_episode_rewards).item()
         max_reward = np.max(eval_episode_rewards).item()
-        writer.add_scalar(tag=f"Eval {aug_key} Mean Reward Of Last 10 Episode Rewards",
-                          scalar_value=mean_reward, global_step=eval_step)
-        writer.add_scalar(tag=f"Eval {aug_key} Median Reward Of Last 10 Episode Rewards",
-                          scalar_value=median_reward, global_step=eval_step)
-        writer.add_scalar(tag=f"Eval {aug_key} Min Reward Of Last 10 Episode Rewards",
-                          scalar_value=min_reward, global_step=eval_step)
-        writer.add_scalar(tag=f"Eval {aug_key} Max Reward Of Last 10 Episode Rewards",
-                          scalar_value=max_reward, global_step=eval_step)
 
-        logger.info(
-            f'Eval {aug_key} Number:{eval_step}, mean reward: {mean_reward}, median reward: {median_reward}, min reward: {min_reward}, max_reward: {max_reward}')
+        if writer is not None:
+            writer.add_scalar(tag=f"Eval {aug_key} Mean Reward Of Last 10 Episode Rewards",
+                              scalar_value=mean_reward, global_step=eval_step)
+            writer.add_scalar(tag=f"Eval {aug_key} Median Reward Of Last 10 Episode Rewards",
+                              scalar_value=median_reward, global_step=eval_step)
+            writer.add_scalar(tag=f"Eval {aug_key} Min Reward Of Last 10 Episode Rewards",
+                              scalar_value=min_reward, global_step=eval_step)
+            writer.add_scalar(tag=f"Eval {aug_key} Max Reward Of Last 10 Episode Rewards",
+                              scalar_value=max_reward, global_step=eval_step)
+
+        if logger is not None:
+            logger.info(
+                f'Eval {aug_key} Number:{eval_step}, mean reward: {mean_reward}, median reward: {median_reward}, min reward: {min_reward}, max_reward: {max_reward}')
 
         mean_reward_list.append(mean_reward)
 

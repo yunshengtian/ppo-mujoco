@@ -89,9 +89,9 @@ class DiscreteAugmenter(nn.Module):
         self.logits = torch.nn.Sequential(torch.nn.Linear(1, self.num_augs),
                                           torch.nn.Softmax())
 
-    def forward(self):
-        tau = self.tau.forward(torch.ones(1))
-        logits = self.logits.forward(torch.ones(1))
+    def forward(self, device):
+        tau = self.tau.forward(torch.ones(1).to(device=device)) + 1e-5
+        logits = self.logits.forward(torch.ones(1).to(device=device))
         return F.gumbel_softmax(logits, tau=tau, hard=True)
 
 
@@ -104,11 +104,13 @@ class AugPolicy(Policy):
         self.augmenter = DiscreteAugmenter(num_augs=self.num_augs)
 
     def evaluate_actions(self, inputs, rnn_hxs, masks, action):
-        sampled_tensor = self.augmenter.forward()
-        aug_idx = torch.argmax(sampled_tensor)[0]
-        aug_inputs = inputs.tile(self.num_augs, 1, 1, 1)
+        sampled_tensor = self.augmenter.forward(inputs.get_device())
+        aug_idx = torch.argmax(sampled_tensor).item()
+        tnsr_shape = tuple([self.num_augs] + list(inputs.shape))
+        aug_inputs = torch.zeros(tnsr_shape)
         aug_inputs[aug_idx] = self.augs_func_list[aug_idx](inputs)
-        aug_inputs = torch.sum(aug_inputs, dim=0)
+        inputs_prod = sampled_tensor.view(self.num_augs, 1, 1, 1, 1) * aug_inputs.to(device=inputs.get_device())
+        aug_inputs = torch.sum(input=inputs_prod, dim=0)
         return super().evaluate_actions(inputs=aug_inputs,
                                         rnn_hxs=rnn_hxs, masks=masks, action=action)
 

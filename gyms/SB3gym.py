@@ -17,7 +17,7 @@ class SB3gym(gym.Env):
         )
 
     def step(self, action):
-        obs, reward, done, info = self.env.step(action=action)
+        _, reward, done, info = self.env.step(action=action)
         rgb_obs = self.env.render(
             mode="rgb_array", width=self.width, height=self.height
         )
@@ -25,7 +25,7 @@ class SB3gym(gym.Env):
         return rgb_obs, reward, done, info
 
     def reset(self):
-        obs = self.env.reset()
+        _ = self.env.reset()
         rgb_obs = self.env.render(
             mode="rgb_array", width=self.width, height=self.height
         )

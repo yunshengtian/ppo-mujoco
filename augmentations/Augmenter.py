@@ -64,14 +64,14 @@ class Augmenter:
             self.is_translate = True
 
         if augs == 'rad':
-            self.augs = [value for key, value in aug_to_func.items()]
+            self.augs = [value for _, value in aug_to_func.items()]
             self.is_crop = True
             self.is_translate = True
         elif not augs or isinstance(augs, str):
             raise ValueError(
                 f'Augs should string: "rad" or non-empty list not: {augs}')
         elif cfg['algorithm'] == 'Aug_PPO':
-            raise NotImplementedError
+            self.augs = list()
         else:
             self.augs = create_aug_func_list(augs_list=augs)
 
@@ -88,6 +88,12 @@ class Augmenter:
         sampled_idxes = np.random.choice(self.num_augs, self.batch_sz)
         unique_values = np.unique(sampled_idxes)
         input_aug = torch.clone(input).to(device=self.device)
+
+        if self.is_crop:
+            pass
+
+        if self.is_translate:
+            pass
 
         for value in unique_values:
             idxes_matching = np.where(sampled_idxes == value)[0]
