@@ -9,10 +9,7 @@ from algo.envs import VecNormalize
 
 
 def save_model(save_path, agent, epoch, is_best: bool = False):
-    try:
-        os.makedirs(save_path)
-    except OSError:
-        pass
+    os.makedirs(save_path, exist_ok=True)
 
     file_name = "checkpoint.pt"
 
