@@ -55,8 +55,7 @@ class Augmenter:
         self.is_full = cfg['train']['augmentation']['is_full']
         self.device = device
 
-        # TODO: Change to list rather than dict
-        self.augs = dict()
+        self.augs = list()
 
         if 'crop' in augs:
             self.is_crop = True
@@ -65,7 +64,7 @@ class Augmenter:
             self.is_translate = True
 
         if augs == 'rad':
-            self.augs = aug_to_func
+            self.augs = [value for key, value in aug_to_func.items()]
             self.is_crop = True
             self.is_translate = True
         elif not augs or isinstance(augs, str):
@@ -74,55 +73,25 @@ class Augmenter:
         elif cfg['algorithm'] == 'Aug_PPO':
             raise NotImplementedError
         else:
-            self.augs = create_aug_func_dict(augs_list=augs)
+            self.augs = create_aug_func_list(augs_list=augs)
 
-        self.aug_keys = list(self.augs.keys())
+        self.num_augs = len(self.augs)
 
     def augment_tensors_in_batches(self, input):
         if self.is_full:
             self.batch_sz = input.shape[0]
-            idxes_arr = np.arange(input.shape[0])
         else:
-            idxes_arr = np.random.choice(
-                input.shape[0], self.batch_sz, replace=False)
+            sampled_batch_idxes = np.random.choice(
+                input.shape[0], self.batch_sz)
+            input = input[sampled_batch_idxes]
 
-        inputs_augmented = torch.zeros(
-            tuple([self.batch_sz] + list(input.shape[1:])))
-        
-        # TODO: Optimize this
+        sampled_idxes = np.random.choice(self.num_augs, self.batch_sz)
+        unique_values = np.unique(sampled_idxes)
+        input_aug = torch.clone(input).to(device=self.device)
 
-        for i in range(len(idxes_arr)):
-            idx = idxes_arr[i]
-            sampled_aug = np.random.choice(
-                self.aug_keys, 1, p=self.probs_list)[0]
-            print(f"Applying aug: {sampled_aug}")
-            inputs_augmented[i] = self.augs[sampled_aug](
-                input[idx].unsqueeze(dim=0)).squeeze(0)
+        for value in unique_values:
+            idxes_matching = np.where(sampled_idxes == value)[0]
+            input_aug[idxes_matching] = self.augs[value](
+                input[idxes_matching]).to(self.device)
 
-        return inputs_augmented.to(device=self.device)
-
-    def augment_tensors(self, input):
-        sampled_idxes = self.sampling_distribution.sample(
-            sample_shape=torch.zeros(input.shape[0]).shape)
-        unique_idxes = torch.unique(input=sampled_idxes).tolist()
-        obs_augmented = torch.clone(input)
-        augs_list = list(self.augs.keys())
-
-        for idx in unique_idxes:
-            aug = self.augs[augs_list[idx]]
-            selected_idxes = (sampled_idxes == idx).nonzero().flatten()
-
-            input_selected = input[selected_idxes]
-
-            if self.is_crop:
-                input_selected = rad.random_crop(input_selected)
-            elif self.is_translate:
-                input_selected = rad.random_translate(input_selected)
-
-            tnsr_augmented = aug(input_selected)
-
-            assert tnsr_augmented.dtype is torch.IntTensor
-
-            obs_augmented[selected_idxes] = tnsr_augmented
-
-        return obs_augmented.to(device=self.device)
+        return input_aug
