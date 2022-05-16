@@ -1,4 +1,4 @@
-id: discrete_full
+id: discrete
 task: HalfCheetah-v3
 num_frame_stack: 4
 screen_height: 100

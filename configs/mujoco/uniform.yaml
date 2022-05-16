@@ -1,4 +1,4 @@
-id: uniform_full
+id: uniform
 task: HalfCheetah-v3
 num_frame_stack: 4
 screen_height: 100

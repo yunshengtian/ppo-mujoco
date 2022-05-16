@@ -1,5 +1,5 @@
 id: clean
-task:  Humanoid-v2 # HalfCheetah-v3
+task:   HalfCheetah-v3
 num_frame_stack: 4
 screen_height: 100
 screen_width: 100
